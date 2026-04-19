@@ -1,12 +1,13 @@
-# Étape 1 : Build avec Maven
+# Étape 1 : Build
 FROM maven:3.8.4-openjdk-17 AS build
+WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Étape 2 : Exécution avec Java 17 (Temurin est disponible sur Render)
 # Étape 2 : Exécution
 FROM eclipse-temurin:17-jdk-alpine
-# Retirez le "/" devant target
-COPY --from=build target/*.jar app.jar
+WORKDIR /app
+# On utilise un chemin relatif plus sûr pour copier le jar
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
